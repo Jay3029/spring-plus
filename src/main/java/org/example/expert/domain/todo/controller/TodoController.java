@@ -37,7 +37,7 @@ public class TodoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate
     ) {
-        return ResponseEntity.ok(todoService.getTodos(page, size, weather));
+        return ResponseEntity.ok(todoService.getTodos(page, size, weather, startDate, endDate));
     }
 
     @GetMapping("/todos/{todoId}")
