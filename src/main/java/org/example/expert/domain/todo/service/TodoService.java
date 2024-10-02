@@ -14,8 +14,11 @@ import org.example.expert.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -48,10 +51,26 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDateTime startDate, LocalDateTime endDate) {
+
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        Page<Todo> todos;
+
+        // 조건에 따라 쿼리 분기 처리
+        if (weather != null && startDate != null && endDate != null) {
+            // weather와 기간 필터링
+            todos = todoRepository.findByWeatherAndModifiedAtBetween(weather, startDate, endDate, pageable);
+        } else if (weather != null) {
+            // weather 필터링만
+            todos = todoRepository.findByWeather(weather, pageable);
+        } else if (startDate != null && endDate != null) {
+            // 기간 필터링만
+            todos = todoRepository.findByModifiedAtBetween(startDate, endDate, pageable);
+        } else {
+            // 필터링 없이 전체 목록
+            todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        }
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
